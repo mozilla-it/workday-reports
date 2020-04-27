@@ -7,13 +7,13 @@ A simple lib for downloading reports from workday
     import json
     from WorkdayReports import raw_reports
 
-    report = raw_reports.RawReports(
+    rr = raw_reports.RawReports(
         report_url="<REPORT_URL_HERE>",
         username="<USERNAME_HERE>",
         password="<PASSWORD_HERE>"
     )
 
-    results = report.get_report()
+    results = rr.get_report()
 
     print("raw results:\n%s" % results)
     as_python_data_structure = json.loads(results)
