@@ -21,6 +21,7 @@ A simple lib for downloading reports from workday
 OR
 
     [...]
+
     rr = raw_reports.RawReports()
 
     results = rr.get_report(
@@ -28,6 +29,7 @@ OR
         username="<USERNAME_HERE>",
         password="<PASSWORD_HERE>"
     )
+
     [...]
 
 ## Development Environment Setup
