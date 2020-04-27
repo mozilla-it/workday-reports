@@ -1,7 +1,18 @@
-# python-library-template
+# workday-reports
 
-A github repo template with some minimal best practices
+A simple lib for downloading reports from workday
 
+## Usage
+
+  from WorkdayReports import raw_reports
+
+  report = raw_reports.RawReports(
+     report_url="<REPORT_URL_HERE>",
+     username="<USERNAME_HERE>",
+     password="<PASSWORD_HERE>"
+  )
+
+  print(report.get_report())
 
 ## Development Environment Setup
 

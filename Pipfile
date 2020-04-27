@@ -8,6 +8,7 @@ detect-secrets = "*"
 
 [packages]
 pre-commit = "*"
+requests = ">=2.23.0,<3"
 
 [requires]
 python_version = "3.7"
