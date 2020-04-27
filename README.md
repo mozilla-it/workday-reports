@@ -20,9 +20,7 @@ A simple lib for downloading reports from workday
 
 OR
 
-    import json
-    from WorkdayReports import raw_reports
-
+    [...]
     rr = raw_reports.RawReports()
 
     results = rr.get_report(
@@ -30,9 +28,7 @@ OR
         username="<USERNAME_HERE>",
         password="<PASSWORD_HERE>"
     )
-
-    print("raw results:\n%s" % results)
-    as_python_data_structure = json.loads(results)
+    [...]
 
 ## Development Environment Setup
 
