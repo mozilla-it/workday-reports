@@ -5,9 +5,9 @@ verify_ssl = true
 
 [dev-packages]
 detect-secrets = "*"
+pre-commit = "*"
 
 [packages]
-pre-commit = "*"
 requests = ">=2.23.0,<3"
 
 [requires]
