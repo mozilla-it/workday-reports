@@ -6,27 +6,33 @@ import csv
 
 logger = logging.getLogger(__name__)
 
+
 class Report:
     """
-    This class can download a report based on URI from workday (or read it from file), and optionally parse the report, store it, or return it raw.
+    This class can download a report based on URI from workday (or read it from file), 
+    and optionally parse the report, store it, or return it raw.
     Parameters:
-    * report_url, base_url, report_uri can be used to define where the report is retrieved from. report_url takes precedent over base_url+report_uri. A sane base_url is provided. Either report_url or report_uri are required unless using input_filename, which will forego hitting workday.
+    * report_url, base_url, report_uri can be used to define where the report is retrieved from. 
+      report_url takes precedent over base_url+report_uri. A sane base_url is provided. 
+      Either report_url or report_uri are required unless using input_filename, which will forego hitting workday.
     * username, password: workday credentials (required)
     * proxies: http proxy for hitting workday (optional)
-    * input_filename, output_filename: can be used for reading and writing reports. Using input_filename will prevent hitting workday and should only be used for testing/debugging. output_filename is used for writing a report to file.
+    * input_filename, output_filename: can be used for reading and writing reports. 
+      Using input_filename will prevent hitting workday and should only be used for testing/debugging. 
+      output_filename is used for writing a report to file.
 
     Example usage:
 
-    >>> from WorkdayReports import Report
+    >>> from WorkdayReports.raw_reports import Report
     >>> report = Report(username="test",password="redacted",report_uri="/ccx/service/customreport/thing/ANOTHER_THING/report_name")
-    >>> report.get()
+    >>> print(len(list(report)))
     >>> report.write("/tmp/report.csv")
     >>> 
     >>> new_report = Report(input_filename="/tmp/report.csv")
-    >>> new_report.parse()
-    >>> print(report.report_parsed) # returns a List of OrderedDict
+    >>> print(len(list(new_report)))
 
     """
+
     def __init__(
         self,
         report_url: str = "",
@@ -56,13 +62,19 @@ class Report:
 
         if not self.report_url and base_url and report_uri:
             self.report_url = f"{base_url}/{report_uri}"
-        if '?' not in self.report_url:
+        if "?" not in self.report_url:
             self.report_url += "?format=csv&bom=true"
-        if 'format=csv' not in self.report_url:
-            logger.warning("format=csv was not found in the URL arguments to Workday, this may not work.")
+        if "format=csv" not in self.report_url:
+            logger.warning(
+                "format=csv was not found in the URL arguments to Workday, this may not work."
+            )
 
-        assert self.report_url, "report_url or report_uri or input_filename must be specified."
-        assert self.username and self.password, "Must provide username and password credentials to workday"
+        assert (
+            self.report_url
+        ), "report_url or report_uri or input_filename must be specified."
+        assert (
+            self.username and self.password
+        ), "Must provide username and password credentials to workday"
 
         self.get()
         self.parse()
@@ -85,14 +97,16 @@ class Report:
             raise Exception("Must specify an input filename")
         txt = open(self._input_filename, "r").read()
         self._report = txt
-        self._report_bytes = bytes(txt,"utf-8")
+        self._report_bytes = bytes(txt, "utf-8")
         return True
 
     def get(self) -> bool:
         try:
             if self.username and self.password:
                 r = requests.get(
-                    self.report_url, auth=(self.username, self.password), proxies=self.proxies,
+                    self.report_url,
+                    auth=(self.username, self.password),
+                    proxies=self.proxies,
                 )
             else:
                 r = requests.get(self.report_url, proxies=self.proxies)
@@ -103,12 +117,13 @@ class Report:
         except:
             logger.critical(sys.exc_info()[0])
             raise
+
     def write(self, filename: str = None) -> bool:
         if filename:
             self._output_filename = filename
         if not self._output_filename:
             raise Exception("Must specify an output filename")
-        f = open(self._output_filename,"wb")
+        f = open(self._output_filename, "wb")
         f.write(self._report_bytes)
         f.close()
         return True
@@ -121,4 +136,3 @@ class Report:
             report_parsed += [row]
         self._report_parsed = report_parsed
         return True
-
