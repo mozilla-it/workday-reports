@@ -3,9 +3,14 @@ name = "pypi"
 url = "https://pypi.org/simple"
 verify_ssl = true
 
+[[source]]
+name = "MozITpypi"
+url = "https://${PRIVATE_PYPI_USERNAME}:${PRIVATE_PYPI_PASSWORD}@dp2-admin.wl.r.appspot.com/pypi"
+
 [dev-packages]
 detect-secrets = "*"
 pre-commit = "*"
+twine = "*"
 
 [packages]
 requests = ">=2.23.0,<3"
