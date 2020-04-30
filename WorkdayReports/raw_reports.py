@@ -3,18 +3,20 @@ import sys
 import logging
 import io
 import csv
+import json
 
 logger = logging.getLogger(__name__)
 
 
 class Report:
     """
-    This class can download a report based on URI from workday (or read it from file), 
+    This class can download a report based on URI from workday (or read it from file) in CSV or JSON format, 
     and optionally parse the report, store it, or return it raw.
     Parameters:
     * report_url, base_url, report_uri can be used to define where the report is retrieved from. 
       report_url takes precedent over base_url+report_uri. A sane base_url is provided. 
       Either report_url or report_uri are required unless using input_filename, which will forego hitting workday.
+    * input_format: format to retrieve report in. Supported: {csv|json}
     * username, password: workday credentials (required)
     * proxies: http proxy for hitting workday (optional)
     * input_filename, output_filename: can be used for reading and writing reports. 
@@ -24,13 +26,15 @@ class Report:
     Example usage:
 
     >>> from WorkdayReports.raw_reports import Report
-    >>> report = Report(username="test",password="redacted",report_uri="/ccx/service/customreport/thing/ANOTHER_THING/report_name")
+    >>> report = Report(username="test",
+    ...                 password="redacted",
+    ...                 report_uri="/ccx/service/customreport/thing/ANOTHER_THING/report_name",
+    ...                 input_format="csv")
     >>> print(len(list(report)))
     >>> report.write("/tmp/report.csv")
     >>> 
     >>> new_report = Report(input_filename="/tmp/report.csv")
     >>> print(len(list(new_report)))
-
     """
 
     def __init__(
@@ -43,6 +47,7 @@ class Report:
         report_uri: str = None,
         input_filename: str = None,
         output_filename: str = None,
+        input_format: str = "csv",
     ):
         self.report_url = report_url
         self.username = username
@@ -53,6 +58,7 @@ class Report:
         self._report_parsed = []
         self._input_filename = input_filename
         self._output_filename = output_filename
+        self._input_format = input_format
 
         if self._input_filename:
             self.read()
@@ -61,12 +67,12 @@ class Report:
             return None
 
         if not self.report_url and base_url and report_uri:
-            self.report_url = f"{base_url}/{report_uri}"
+            self.report_url = f"{base_url}{report_uri}"
         if "?" not in self.report_url:
-            self.report_url += "?format=csv&bom=true"
-        if "format=csv" not in self.report_url:
+            self.report_url += f"?format={self._input_format}&bom=true" # TODO: what does bom=true mean?
+        if f"format={self._input_format}" not in self.report_url:
             logger.warning(
-                "format=csv was not found in the URL arguments to Workday, this may not work."
+                f"format={self._input_format} was not found in the URL arguments to Workday, this may not work."
             )
 
         assert (
@@ -128,7 +134,11 @@ class Report:
         f.close()
         return True
 
-    def parse(self) -> bool:
+    def parse_json(self) -> bool:
+        self._report_parsed = json.loads(self._report).get('Report_Entry',[])
+        return True
+
+    def parse_csv(self) -> bool:
         report_parsed = []
         rows = csv.DictReader(self._report.splitlines())
         for row in rows:
@@ -136,3 +146,10 @@ class Report:
             report_parsed += [row]
         self._report_parsed = report_parsed
         return True
+
+    def parse(self) -> bool:
+        if self._input_format == 'csv':
+            return self.parse_csv()
+        if self._input_format == 'json':
+            return self.parse_json()
+        return False
