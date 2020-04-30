@@ -136,6 +136,7 @@ class Report:
 
     def parse_json(self) -> bool:
         self._report_parsed = json.loads(self._report).get('Report_Entry',[])
+        return True
 
     def parse_csv(self) -> bool:
         report_parsed = []
