@@ -1,11 +1,9 @@
 import os
 import setuptools
 from setuptools import setup, find_packages
-from pip._internal.req import parse_requirements
 
-requirements = [
-    str(r.req) for r in parse_requirements("requirements.txt", session=False)
-]
+with open("requirements.txt") as f:
+    requirements = f.read().splitlines()
 
 setup(
     name="workday-reports",
